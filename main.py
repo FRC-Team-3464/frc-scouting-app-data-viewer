@@ -2,12 +2,20 @@ from bokeh.plotting import figure, show
 from bokeh.io import curdoc
 from bokeh.models import NumeralTickFormatter
 import random
+<<<<<<< HEAD
 
 # sessions = ["auto", "transition", "phase 1", "phase 2", "phase 3", "phase 4", "endgame"]
 # total_points = [23, 10, 40, 0, 43, 0, 37]
 y = random.sample(range(0, 100), 7)
 x = list(range(0, 7))
 # curdoc().theme = "dark_minimal"
+=======
+#sessions = ["auto", "transition", "phase 1", "phase 2", "phase 3", "phase 4", "endgame"]
+#total_points = [23, 10, 40, 0, 43, 0, 37]
+y= random.sample(range(0,100),7)
+x= list(range(0,7))
+#curdoc().theme = "dark_minimal"
+>>>>>>> df6abde (fixed small error)
 colors = [f"#{255:02x}{int((value * 255) / 100):02x}{255:02x}" for value in y]
 score_graph = figure(
     title="Scores",
