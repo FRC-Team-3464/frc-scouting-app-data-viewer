@@ -134,8 +134,6 @@ if __name__ == "__main__":
         for teamnum, matches in all_data.items():
             print(f"Team {teamnum}: {len(matches)} matches")
 
-        print(json.dumps(all_data, indent=4))
-
         output_filename = "fetched_data.json"
         try:
             with open(output_filename, "w") as outfile:
