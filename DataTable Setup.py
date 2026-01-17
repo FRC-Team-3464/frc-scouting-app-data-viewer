@@ -1,5 +1,6 @@
 from bokeh.io import show
 from bokeh.models import ColumnDataSource,DataTable, TableColumn
+
 import random
 
 data = dict(
