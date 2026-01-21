@@ -1,16 +1,12 @@
-from bokeh.io import show, curdoc
-from bokeh.models import ColumnDataSource, DataTable, TableColumn
-from bokeh.layouts import column
-from bokeh.themes import Theme, built_in_themes
 import json
-import random
-from bokeh.models import HTMLTemplateFormatter
+from bokeh.io import output_file, show
+from bokeh.models import ColumnDataSource, DataTable, TableColumn
 
 COLUMN_ORDER = [
     "teamNumber",
     "entries",
-    "avgAutoFuel",
-    "avgTransitionFuel",
+    "avgautoFuel",
+    "avgtransitionFuel",
     "avgFirstActiveHubFuel",
     "avgSecondActiveHubFuel",
     "avgTeleopFuel",
@@ -33,13 +29,13 @@ print(f"Loaded data for {len(fetched_data)} teams")
 processedData = {
     "teamNumber": TEAMS,
     "entries": [],
-    "avgAutoFuel": [],
-    "avgTransitionFuel": [],
-    "avgFirstActiveHubFuel": [],
-    "avgSecondActiveHubFuel": [],
-    "avgTeleopFuel": [],
-    "avgEndgameFuel": [],
-    "avgTotalFuel": [],
+    "autoFuel": [],
+    "transitionFuel": [],
+    "firstActiveHubFuel": [],
+    "secondActiveHubFuel": [],
+    "teleopFuel": [],
+    "endgameFuel": [],
+    "totalFuel": [],
 }
 for team in TEAMS:
     team_matches = fetched_data.get(team, {})
@@ -80,7 +76,44 @@ for team in TEAMS:
         )
         endgameFuels.append(endgameFuel)
         totalFuels.append(totalFuel)
+    processedData["avgautoFuel"].append((autoFuels)
         
-for id in range(TEAMS):
-    
-    
+
+
+# Output HTML file
+output_file("datatable_example.html")
+
+# 1️⃣ Data (column-oriented)
+data = {
+    "team": TEAMS,
+    "match": processedData["entries"],
+    "autoFuel": processedData["avgautoFuel"],
+    "transitionFuel": processedData["avgtransitionFuel"],
+    "firstActiveHubFuel": processedData["avgFirstActiveHubFuel"],
+    "secondActiveHubFuel": processedData["avgSecondActiveHubFuel"],
+    "endgameFuel": processedData["avgEndgameFuel"],
+}
+
+# 2️⃣ ColumnDataSource
+source = ColumnDataSource(data)
+
+# 3️⃣ Table columns
+columns = [
+    TableColumn(field="team", title="Team"),
+    TableColumn(field="match", title="Match"),
+    TableColumn(field="autoFuel", title="Auto Fuel"),
+    TableColumn(field="endgameClimb", title="Endgame Climb"),
+]
+
+# 4️⃣ DataTable
+table = DataTable(
+    source=source,
+    columns=columns,
+    width=600,
+    height=300,
+    selectable=True,
+    sortable=True,
+)
+
+# 5️⃣ Show
+show(table)
