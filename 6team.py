@@ -12,4 +12,4 @@ blue = [
     6728
 ]
 logger.log(f"Viewing teams: Red {red}, Blue {blue}")
-pv.view(red + blue)
+pv.view(red + blue, True)

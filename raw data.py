@@ -142,7 +142,7 @@ if allRows:
     numRows = len(allRows)
     numCols = len(finalColumns)
 
-    dynamicHeight = max(400, min(numRows * 30 + 50, 800))
+    dynamicHeight = 1200 if numRows > 40 else max(400, min(numRows * 30 + 50, 800))
     dynamicWidth = max(1200, numCols * 100)
 
     # 7. Create Layout

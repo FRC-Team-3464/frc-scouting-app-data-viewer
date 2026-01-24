@@ -3,7 +3,6 @@ import fetchfromdb
 from bokeh.io import output_file, show
 from bokeh.models import ColumnDataSource, DataTable, TableColumn, HTMLTemplateFormatter
 
-
 # Configuration
 COLUMN_ORDER = [
     "teamNumber",
@@ -16,7 +15,6 @@ COLUMN_ORDER = [
     "avgTotalFuel",
 ]
 
-# List of all variables to receive gradients
 GRADIENT_COLUMNS = [
     "avgAutoFuel",
     "avgTransitionFuel",
@@ -40,8 +38,8 @@ def processTeamAverages(filePath, teams=None):
             teamList = teams
         else:
             teamList = fetchedData.get("team", [])
+
         rootData = fetchedData.get("root", {})
-        print(f"Loaded data for {len(rootData)} teams")
 
         summaryData = {
             "teamNumber": [],
@@ -57,7 +55,6 @@ def processTeamAverages(filePath, teams=None):
         for team in teamList:
             teamMatches = rootData.get(str(team), {})
             matchCount = len(teamMatches)
-
             tempAuto, tempTransition, tempFirstHub = [], [], []
             tempSecondHub, tempEndgame, tempTotal = [], [], []
 
@@ -65,13 +62,10 @@ def processTeamAverages(filePath, teams=None):
                 auto = matchData.get("autoFuel", 0)
                 transition = matchData.get("transitionFuel", 0)
                 endgame = matchData.get("endgameFuel", 0)
-
                 firstShift = 1 if matchData.get("shift1HubActive") else 2
                 secondShift = 3 if matchData.get("shift3HubActive") else 4
-
                 firstHub = matchData.get(f"shift{firstShift}Fuel", 0)
                 secondHub = matchData.get(f"shift{secondShift}Fuel", 0)
-
                 total = auto + transition + endgame + firstHub + secondHub
 
                 tempAuto.append(auto)
@@ -93,29 +87,36 @@ def processTeamAverages(filePath, teams=None):
             summaryData["avgTotalFuel"].append(calculateAverage(tempTotal))
 
         return summaryData
-
     except Exception as e:
         print(f"Error: {e}")
         return None
 
 
-# --- Main Execution ---
-def view(teams=None):
+def view(teams=None, color=False):
     processedSummary = processTeamAverages("fetched_data.json", teams)
 
     if processedSummary:
         output_file("team_averages.html")
+        numTeams = len(processedSummary["teamNumber"])
 
-        # 1. Apply Gradient Logic
+        # 1. Apply Logic for teamNumber coloring
+        if color:
+            teamColors = ["transparent"] * numTeams
+            for i in range(numTeams):
+                if i < 3:
+                    teamColors[i] = "#ffb4b4"  # Light Red
+                elif i >= numTeams - 3:
+                    teamColors[i] = "#b4b4ff"  # Light Blue
+            processedSummary["teamNumberColor"] = teamColors
+
+        # 2. Apply Gradient Logic for data columns
         for col in GRADIENT_COLUMNS:
             if col in processedSummary:
                 vals = [float(v) for v in processedSummary[col]]
                 maxV = max(vals) if vals and max(vals) > 0 else 1
-
                 colors = []
                 for v in vals:
                     ratio = min(max(v / maxV, 0), 1)
-                    # Red (255, 180, 180) to Green (180, 255, 180)
                     r = int(255 - (75 * ratio))
                     g = int(180 + (75 * ratio))
                     colors.append(f"rgb({r}, {g}, 180)")
@@ -123,13 +124,25 @@ def view(teams=None):
 
         source = ColumnDataSource(processedSummary)
 
-        # 2. Build Columns with Formatters
+        # 3. Build Columns with Formatters
         tableColumns = []
         for col in COLUMN_ORDER:
             title = col.replace("avg", "Avg ").replace("Fuel", " Fuel")
 
-            # Check if this column needs a gradient
-            if col in GRADIENT_COLUMNS:
+            if col == "teamNumber" and color:
+                formatter = HTMLTemplateFormatter(
+                    template="""
+                    <div style="background-color: <%= teamNumberColor %>; 
+                                padding: 4px; margin: -4px; height: 100%;">
+                        <%= value %>
+                    </div>
+                """
+                )
+                tableColumns.append(
+                    TableColumn(field=col, title=title, formatter=formatter, width=100)
+                )
+
+            elif col in GRADIENT_COLUMNS:
                 formatter = HTMLTemplateFormatter(
                     template=f"""
                     <div style="background-color: <%= {col}Color %>; 
@@ -144,8 +157,7 @@ def view(teams=None):
             else:
                 tableColumns.append(TableColumn(field=col, title=title, width=100))
 
-        # 3. Dynamic Sizing
-        numTeams = len(processedSummary["teamNumber"])
+        # Dynamic Sizing
         dynamicHeight = max(400, min(numTeams * 30 + 50, 800))
         dynamicWidth = max(1000, len(tableColumns) * 125)
 
@@ -161,6 +173,8 @@ def view(teams=None):
 
         show(dataTable)
 
+
 if __name__ == "__main__":
     fetchfromdb.fetch()
-    view()
+    # To see the colors, pass True here:
+    view(color=False)
