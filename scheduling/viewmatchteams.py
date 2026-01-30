@@ -63,17 +63,20 @@ def view_match_schedule(file_path):
         scouter_list = '<div style="display: flex; flex-direction: column; height: 100%; width: 100%;">'
 
         for _ in names:
-            scouter_list += f'<div style="border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>{names[random.randint(0,13)]}</div>'
+            scouter = names[random.randint(0,13)]
+            fetched_data["root"]["9999"]["1"]["name"] = scouter #TEMP
+            scouter_list += f'<div style="border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>{scouter}</div>'
         scouter_list += "</div>"
 
 
         scout_check = '<div style="display: flex; flex-direction: column; height: 100%; width: 100%;">'
 
         for _ in names:
-            if match == fetched_data["root"]["9999"][m_num]:
-                scout_check += f'<div style="background-color: #abffb5 border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>Correct</div>'
+
+            if match == fetched_data["root"]["9999"][m_num]: #PLS FIX
+                scout_check += f'<div style="background-color: #abffb5; border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>Correct</div>'
             else:
-                scout_check += f'<div style="background-color: #ffabab border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>Incorrect</div>'
+                scout_check += f'<div style="background-color: #ffabab; border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>Incorrect</div>'
         scout_check += "</div>"
 
 
