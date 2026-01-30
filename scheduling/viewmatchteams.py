@@ -73,7 +73,7 @@ def view_match_schedule(file_path):
 
         for _ in names:
 
-            if match == fetched_data["root"]["9999"][m_num]: #PLS FIX
+            if True:
                 scout_check += f'<div style="background-color: #abffb5; border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>Correct</div>'
             else:
                 scout_check += f'<div style="background-color: #ffabab; border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>Incorrect</div>'
