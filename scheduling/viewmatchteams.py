@@ -1,7 +1,14 @@
 import json
 from bokeh.io import output_file, show
 from bokeh.models import ColumnDataSource, DataTable, TableColumn, HTMLTemplateFormatter
+import random
 
+
+
+names = ['J Edward E', 'Ding Dong', 'sam slong', 'sam blue', 'sam black', 'sam meng', 'max dong', 'max hayward', 'will faleleev', 'Guoxiang Ding', 'diddy', 'agent k', 'november', 'Mujiao Li']
+
+with open('fetched_data.json', 'r') as file:
+    fetched_data = json.load(file)
 
 def view_match_schedule(file_path):
     try:
@@ -19,13 +26,13 @@ def view_match_schedule(file_path):
     # Sort matches by match number
     qual_matches.sort(key=lambda x: x.get("match_number", 0))
 
-    table_data = {"match_num": [], "teams_html": []}
+    table_data = {"match_num": [], "teams_html": [], "scouters_name": [], "scout_check": []}
 
     # Use a set to track match numbers we've already added
     seen_matches = set()
 
     for match in qual_matches:
-        m_num = match.get("match_number")
+        m_num = match.get("match_number")        
 
         if m_num in seen_matches:
             continue
@@ -43,15 +50,38 @@ def view_match_schedule(file_path):
         # Using min-height and box-sizing to ensure it fills the Bokeh row perfectly
         html_string = '<div style="display: flex; flex-direction: column; height: 100%; width: 100%;">'
 
+
+
         for team in red:
             html_string += f'<div style="background-color: #ffb4b4; border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;">{team}</div>'
         for team in blue:
             html_string += f'<div style="background-color: #b4b4ff; border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;">{team}</div>'
-
         html_string += "</div>"
+
+
+
+        scouter_list = '<div style="display: flex; flex-direction: column; height: 100%; width: 100%;">'
+
+        for _ in names:
+            scouter_list += f'<div style="border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>{names[random.randint(0,13)]}</div>'
+        scouter_list += "</div>"
+
+
+        scout_check = '<div style="display: flex; flex-direction: column; height: 100%; width: 100%;">'
+
+        for _ in names:
+            if match == fetched_data["root"]["9999"][m_num]:
+                scout_check += f'<div style="background-color: #abffb5 border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>Correct</div>'
+            else:
+                scout_check += f'<div style="background-color: #ffabab border-bottom: 1px solid #ccc; flex: 1; padding: 2px; text-align: center;>Incorrect</div>'
+        scout_check += "</div>"
+
 
         table_data["match_num"].append(m_num)
         table_data["teams_html"].append(html_string)
+        table_data["scouters_name"].append(scouter_list)
+        table_data["scout_check"].append(scout_check)
+
 
     source = ColumnDataSource(table_data)
     team_formatter = HTMLTemplateFormatter(template="<%= value %>")
@@ -64,7 +94,20 @@ def view_match_schedule(file_path):
             formatter=team_formatter,
             width=120,
         ),
+        TableColumn(
+            field="scouters_name",
+            title="Scouters",
+            formatter=team_formatter,
+            width = 120
+        ),
+        TableColumn(
+            field="scout_check",
+            title="Scout check",
+            formatter=team_formatter,
+            width = 120
+        )
     ]
+
 
     data_table = DataTable(
         source=source,
@@ -79,7 +122,6 @@ def view_match_schedule(file_path):
 
     output_file("clean_schedule.html")
     show(data_table)
-
 
 if __name__ == "__main__":
     view_match_schedule("output/tba_matches.json")
